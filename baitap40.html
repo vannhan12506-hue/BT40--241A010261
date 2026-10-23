@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bộ Tập Hợp Hình Ảnh Đề Thi Web</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
+      color: #333;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #0d6efd;
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      color: #6c757d;
+      font-size: 14px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      background: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: 1px solid #0d6efd;
+      background-color: white;
+      color: #0d6efd;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    button:hover, button.active {
+      background-color: #0d6efd;
+      color: white;
+    }
+
+    /* Grid Layout */
+    .gallery-container {
+      display: grid;
+      gap: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .grid-view {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .list-view {
+      grid-template-columns: 1fr;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+    }
+
+    .card-header {
+      padding: 12px 16px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .img-wrapper {
+      position: relative;
+      overflow: hidden;
+      background: #eaeff2;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .img-wrapper img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .card-actions {
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #eee;
+      background: white;
+    }
+
+    /* Modal / Lightbox */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.9);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      max-width: 90%;
+      max-height: 80vh;
+      object-fit: contain;
+      transition: transform 0.2s ease;
+    }
+
+    .modal-controls {
+      position: absolute;
+      bottom: 20px;
+      display: flex;
+      gap: 15px;
+      background: rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 30px;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-controls button {
+      border: none;
+      background: white;
+      color: #333;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 30px;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.3);
+      color: white;
+      border: none;
+      font-size: 24px;
+      padding: 15px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .nav-btn.prev { left: 20px; }
+    .nav-btn.next { right: 20px; }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Bộ Ảnh Đề Thi & Đáp Án Trắc Nghiệm Web</h1>
+    <p class="subtitle">Tổng hợp 4 hình ảnh câu hỏi thiết kế & lập trình Web</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="btn-group">
+      <button id="btn-grid" class="active" onclick="setView('grid')">Lưới (2x2)</button>
+      <button id="btn-list" onclick="setView('list')">Danh sách dọc</button>
+    </div>
+    <div>
+      <button onclick="downloadAll()">Tải toàn bộ 4 ảnh</button>
+    </div>
+  </div>
+
+  <main id="gallery" class="gallery-container grid-view">
+    <!-- Card 1 -->
+    <div class="card">
+      <div class="card-header">
+        <span>Ảnh 1 (Câu 49 - 50)</span>
+      </div>
+      <div class="img-wrapper" onclick="openModal(0)">
+        <img src="anh1.jpg.jpg" alt="Ảnh 1" onerror="this.src='https://via.placeholder.com/600x800?text=anh1.jpg.jpg+Not+Found'">
+      </div>
+      <div class="card-actions">
+        <button onclick="openModal(0)">Xem phóng to</button>
+        <a href="anh1.jpg.jpg" download><button>Tải về</button></a>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="card">
+      <div class="card-header">
+        <span>Ảnh 2 (Câu 48 - 50)</span>
+      </div>
+      <div class="img-wrapper" onclick="openModal(1)">
+        <img src="anh2.jpg.jpg" alt="Ảnh 2" onerror="this.src='https://via.placeholder.com/600x800?text=anh2.jpg.jpg+Not+Found'">
+      </div>
+      <div class="card-actions">
+        <button onclick="openModal(1)">Xem phóng to</button>
+        <a href="anh2.jpg.jpg" download><button>Tải về</button></a>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="card">
+      <div class="card-header">
+        <span>Ảnh 3 (Câu 48 - 50)</span>
+      </div>
+      <div class="img-wrapper" onclick="openModal(2)">
+        <img src="anh3.jpg.jpg" alt="Ảnh 3" onerror="this.src='https://via.placeholder.com/600x800?text=anh3.jpg.jpg+Not+Found'">
+      </div>
+      <div class="card-actions">
+        <button onclick="openModal(2)">Xem phóng to</button>
+        <a href="anh3.jpg.jpg" download><button>Tải về</button></a>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="card">
+      <div class="card-header">
+        <span>Ảnh 4 (Câu 49 - 50)</span>
+      </div>
+      <div class="img-wrapper" onclick="openModal(3)">
+        <img src="anh4.jpg.jpg" alt="Ảnh 4" onerror="this.src='https://via.placeholder.com/600x800?text=anh4.jpg.jpg+Not+Found'">
+      </div>
+      <div class="card-actions">
+        <button onclick="openModal(3)">Xem phóng to</button>
+        <a href="anh4.jpg.jpg" download><button>Tải về</button></a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Lightbox -->
+  <div id="imageModal" class="modal">
+    <button class="close-btn" onclick="closeModal()">&times;</button>
+    <button class="nav-btn prev" onclick="changeImage(-1)">&#10094;</button>
+    <button class="nav-btn next" onclick="changeImage(1)">&#10095;</button>
+    
+    <img id="modalImg" class="modal-content" src="" alt="Zoomed image">
+
+    <div class="modal-controls">
+      <button onclick="zoom(0.2)" title="Phóng to">+</button>
+      <button onclick="zoom(-0.2)" title="Thu nhỏ">-</button>
+      <button onclick="rotateImage()" title="Xoay 90 độ">&#8635;</button>
+      <button onclick="resetTransform()" title="Đặt lại">100%</button>
+    </div>
+  </div>
+
+  <script>
+    const images = ['anh1.jpg.jpg', 'anh2.jpg.jpg', 'anh3.jpg.jpg', 'anh4.jpg.jpg'];
+    let currentIndex = 0;
+    let currentZoom = 1;
+    let currentRotation = 0;
+
+    function setView(viewType) {
+      const gallery = document.getElementById('gallery');
+      const btnGrid = document.getElementById('btn-grid');
+      const btnList = document.getElementById('btn-list');
+
+      if (viewType === 'grid') {
+        gallery.className = 'gallery-container grid-view';
+        btnGrid.classList.add('active');
+        btnList.classList.remove('active');
+      } else {
+        gallery.className = 'gallery-container list-view';
+        btnList.classList.add('active');
+        btnGrid.classList.remove('active');
+      }
+    }
+
+    function openModal(index) {
+      currentIndex = index;
+      const modal = document.getElementById('imageModal');
+      const modalImg = document.getElementById('modalImg');
+      modalImg.src = images[currentIndex];
+      modal.classList.add('active');
+      resetTransform();
+    }
+
+    function closeModal() {
+      document.getElementById('imageModal').classList.remove('active');
+    }
+
+    function changeImage(direction) {
+      currentIndex = (currentIndex + direction + images.length) % images.length;
+      document.getElementById('modalImg').src = images[currentIndex];
+      resetTransform();
+    }
+
+    function zoom(amount) {
+      currentZoom = Math.max(0.5, Math.min(3, currentZoom + amount));
+      applyTransform();
+    }
+
+    function rotateImage() {
+      currentRotation = (currentRotation + 90) % 360;
+      applyTransform();
+    }
+
+    function resetTransform() {
+      currentZoom = 1;
+      currentRotation = 0;
+      applyTransform();
+    }
+
+    function applyTransform() {
+      const modalImg = document.getElementById('modalImg');
+      modalImg.style.transform = `scale(${currentZoom}) rotate(${currentRotation}deg)`;
+    }
+
+    function downloadAll() {
+      images.forEach((src, idx) => {
+        const a = document.createElement('a');
+        a.href = src;
+        a.download = `Hinh_Anh_${idx + 1}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+    }
+
+    // Keybindings
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('imageModal');
+      if (!modal.classList.contains('active')) return;
+      if (e.key === 'Escape') closeModal();
+      if (e.key === 'ArrowLeft') changeImage(-1);
+      if (e.key === 'ArrowRight') changeImage(1);
+    });
+  </script>
+</body>
+</html>
